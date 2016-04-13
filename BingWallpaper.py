@@ -8,6 +8,7 @@ import win32api
 import win32con
 import win32gui
 import time
+import sys
 
 
 def get_html(my_url):
@@ -28,13 +29,19 @@ def set_wallpaper_from_bmp(bmp_path):
     :return:
     """
     # 打开指定注册表路径
-    reg_key = win32api.RegOpenKeyEx(win32con.HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers", 0, win32con.KEY_SET_VALUE)
+    reg_key = win32api.RegOpenKeyEx(win32con.HKEY_CURRENT_USER,
+                                    "Control Panel\Desktop", 0,
+                                    win32con.KEY_SET_VALUE)
     # 最后的参数:2拉伸,0居中,6适应,10填充,0平铺
     win32api.RegSetValueEx(reg_key, "WallpaperStyle", 0, win32con.REG_SZ, "2")
     # 最后的参数:1表示平铺,拉伸居中等都是0
     win32api.RegSetValueEx(reg_key, "TileWallpaper", 0, win32con.REG_SZ, "0")
     # 刷新桌面
     win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, bmp_path, win32con.SPIF_SENDWININICHANGE)
+    # 保存注册表
+    win32api.RegSetValueEx(reg_key, "Wallpaper", 0, win32con.REG_SZ, bmp_path)
+    # 关闭注册表
+    win32api.RegCloseKey(reg_key)
 
 
 def set_wallpaper(img_path_, date_):
@@ -51,6 +58,7 @@ def set_wallpaper(img_path_, date_):
     bmp_image.save(new_bmp_path, "BMP")
     set_wallpaper_from_bmp(new_bmp_path)
 
+
 if __name__ == "__main__":
     html = get_html("http://cn.bing.com/")
     pattern = re.compile(r"http://s\.cn\.bing\.net(\w|/|\-|\d|_|\.)*\.jpg")
@@ -59,4 +67,6 @@ if __name__ == "__main__":
     img_name = '%s.jpg' % date
     img_path = 'F:\\bing_image\\' + '%s' % img_name
     urllib.urlretrieve(match.group(), img_path)
-    set_wallpaper(img_path, date)
+    if len(sys.argv) > 0 and sys.argv[0] == '1':  # 保存且更换
+        set_wallpaper(img_path, date)
+    print "Succeed!"
