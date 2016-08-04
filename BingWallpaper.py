@@ -60,13 +60,20 @@ def set_wallpaper(img_path_, date_):
 
 
 if __name__ == "__main__":
-    html = get_html("http://cn.bing.com/")
-    pattern = re.compile(r"http://s\.cn\.bing\.net(\w|/|\-|\d|_|\.)*\.jpg")
+    html = get_html("http://www.bing.com/")
+    pattern = re.compile(r"\"(\w|/|-|\d|_|\.)*\.jpg\"")
     match = re.search(pattern, html)
-    date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
-    img_name = '%s.jpg' % date
-    img_path = 'F:\\bing_image\\' + '%s' % img_name
-    urllib.urlretrieve(match.group(), img_path)
-    if len(sys.argv) > 0 and sys.argv[0] == '1':  # 保存且更换
-        set_wallpaper(img_path, date)
-    print "Succeed!"
+    try:
+        pic_url = match.group()
+        pic_url = "http://www.bing.com/" + pic_url[2:-1]
+        date = time.strftime('%Y-%m-%d', time.localtime(time.time()))
+        img_name = '%s.jpg' % date
+        img_path = 'F:\\bing_image\\' + '%s' % img_name
+        urllib.urlretrieve(pic_url, img_path)
+        if len(sys.argv) > 0 and sys.argv[0] == '1':  # 保存且更换
+            set_wallpaper(img_path, date)
+        print "Succeed!"
+    except AttributeError:
+        print "GTMD BING"
+        exit()
+
